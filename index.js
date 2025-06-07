@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGODBURI)
     
 
 app.get("/", (req, res) =>{
-    res.send("Server is Running")
+    res.send("Server is Running is Brower")
     
 })
 
