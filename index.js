@@ -3,6 +3,7 @@ import morgan from "morgan";
 import 'dotenv/config';
 import mongoose from "mongoose";
 import taskRoutes from "./routers/tasks.js"
+import authRoutes from "./routers/auth.js"
 
 
 const app = express();
@@ -12,6 +13,7 @@ const PORT = 5000;
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use("/task", taskRoutes);
+app.use("/auth", authRoutes);
 
 // console.log("MONGODBURI =>", process.env.MONGODBURI);
 mongoose.connect(process.env.MONGODBURI)
