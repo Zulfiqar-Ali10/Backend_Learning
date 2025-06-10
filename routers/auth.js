@@ -3,20 +3,40 @@ import User from "../models/User.js";
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import sendResponse from "../helpers/sendResponse.js";
+import 'dotenv/config';
 
 const router = express.Router();
 
 const registerSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(30).required(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+  email: Joi.string().email({
+    minDomainSegments: 2,
+    tlds: { allow: ["com", "net"] },
+  }),
+  password: Joi.string().min(6),
   fullname: Joi.string().alphanum().min(3).max(30).required(),
 });
 
-router.post("/register", (req, res) => {
- const { error, value } = registerSchema.validate(req.body);
-if(error) 
-    return sendResponse(res, 400, null, true, "Please input valid fields");
-     res.send("Working on Register API");
+router.post("/register", async (req, res) => {
+  const { error, value } = registerSchema.validate(req.body);
+  if (error) return sendResponse(res, 400, null, true, error.message);
+
+  const user = await User.findOne({ email: value.email });
+  if (user)
+    return sendResponse(
+      res,
+      403,
+      null,
+      true,
+      "User with this email already register"
+    );
+
+    const hashedPassword = await bcrypt.hash(value.passowrd, 10);
+    console.log("hashedPassword", hashedPassword);
+    
+
+  res.send("Working on Register API");
 });
 
 router.post("/login", (req, res) => {});
+
+export default router;
