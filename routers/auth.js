@@ -3,8 +3,8 @@ import User from "../models/User.js";
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import sendResponse from "../helpers/sendResponse.js";
-import 'dotenv/config';
-
+import "dotenv/config";
+import jwt from "jsonwebtoken";
 const router = express.Router();
 
 const registerSchema = Joi.object({
@@ -12,8 +12,16 @@ const registerSchema = Joi.object({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net"] },
   }),
-  password: Joi.string().min(6),
+  password: Joi.string().min(6).required(),
   fullname: Joi.string().alphanum().min(3).max(30).required(),
+});
+
+const loginSchema = Joi.object({
+  email: Joi.string().email({
+    minDomainSegments: 2,
+    tlds: { allow: ["com", "net"] },
+  }),
+  password: Joi.string().min(6).required(),
 });
 
 router.post("/register", async (req, res) => {
@@ -30,13 +38,31 @@ router.post("/register", async (req, res) => {
       "User with this email already register"
     );
 
-    const hashedPassword = await bcrypt.hash(value.passowrd, 10);
-    console.log("hashedPassword", hashedPassword);
-    
+  // const hashedPassword = await bcrypt.hash(value.passowrd, 10);
+  const hashedPassword = await bcrypt.hash(value.password, 10);
+  value.password = hashedPassword;
 
-  res.send("Working on Register API");
+  let newUser = new User({ ...value });
+  newUser = await newUser.save();
+
+  sendResponse(res, 201, newUser, false, "User Reqistered Sucessfully");
 });
 
-router.post("/login", (req, res) => {});
+router.post("/login", async (req, res) => {
+  const { error, value } = loginSchema.validate(req.body);
+  if (error) return sendResponse(res, 400, null, true, error.message);
+
+  const user = await User.findOne({ email: value.email }).lean();
+  if (!user) return sendResponse(res, 403, null, true, "User is not register");
+
+  // const hashedPassword = await bcrypt.hash(value.passowrd, 10);
+  const isPasswordValid = await bcrypt.compare(value.password, user.password);
+  if(!isPasswordValid) return sendResponse(res, 403, null, true, "Invalid Credentails");
+  
+
+  var token = jwt.sign(user, process.env.AUTH_SECRET);
+
+  sendResponse(res, 200, {user, token}, false, "User Login Sucessfully");
+});
 
 export default router;
