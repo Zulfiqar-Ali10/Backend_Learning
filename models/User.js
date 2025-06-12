@@ -7,7 +7,7 @@ const userSchema = new Schema ({
   fullname: {type: String},
   gender: {type: String, enum: ["male", "female"]},
   city: {type: String},
-  coutry: {type: String},
+  country: {type: String},
   dob: {type: String},
   isProfileCompleted : {type: Boolean},
 }, 
