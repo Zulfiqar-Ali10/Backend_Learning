@@ -22,7 +22,7 @@ mongoose.connect(process.env.MONGODBURI)
 .catch((err) => console.log("err=>",  err))    
 
 app.get("/", (req, res) =>{
-    res.send("Server is Running is Brower")
+    res.send("Server Is Running On Brower")
     
 })
 
