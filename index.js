@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGODBURI)
 .catch((err) => console.log("err=>",  err))    
 
 app.get("/", (req, res) =>{
-    res.send("Server Is Running On Brower")
+    res.send("Server Is Running On Brower, You Check It")
     
 })
 
